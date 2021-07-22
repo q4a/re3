@@ -68,7 +68,7 @@ end
 
 workspace "re3"
 	language "C++"
-	configurations { "Debug", "Release", "Vanilla" }
+	configurations { "Debug", "Release" }
 	startproject "re3"
 	location "build"
 	symbols "Full"
@@ -80,6 +80,7 @@ workspace "re3"
 	end
 
 	filter { "system:windows" }
+		configurations { "Vanilla" }
 		platforms {
 			"win-x86-RW33_d3d8-mss",
 			"win-x86-librw_d3d9-mss",
@@ -122,9 +123,6 @@ workspace "re3"
 		if(_OPTIONS["with-lto"]) then
 			flags { "LinkTimeOptimization" }
 		end
-
-	filter "configurations:Vanilla"
-		defines { "VANILLA_DEFINES" }
 
 	filter { "platforms:win*" }
 		system "windows"
@@ -266,7 +264,7 @@ project "re3"
 	files { addSrcFiles("src/modelinfo") }
 	files { addSrcFiles("src/objects") }
 	files { addSrcFiles("src/peds") }
-	files { addSrcFiles("src/render") }
+	files { addSrcFiles("src/renderer") }
 	files { addSrcFiles("src/rw") }
 	files { addSrcFiles("src/save") }
 	files { addSrcFiles("src/skel") }
@@ -295,7 +293,7 @@ project "re3"
 	includedirs { "src/modelinfo" }
 	includedirs { "src/objects" }
 	includedirs { "src/peds" }
-	includedirs { "src/render" }
+	includedirs { "src/renderer" }
 	includedirs { "src/rw" }
 	includedirs { "src/save/" }
 	includedirs { "src/skel/" }
@@ -314,6 +312,9 @@ project "re3"
 		includedirs { "vendor/opus/include" }
 		includedirs { "vendor/opusfile/include" }
 	end
+
+	filter "configurations:Vanilla"
+		defines { "VANILLA_DEFINES" }
 
 	filter "platforms:*mss"
 		defines { "AUDIO_MSS" }

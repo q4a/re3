@@ -326,6 +326,7 @@ CPed::~CPed(void)
 					nearPed->m_nearPeds[k] = nearPed->m_nearPeds[k + 1];
 					nearPed->m_nearPeds[k + 1] = nil;
 				}
+				nearPed->m_nearPeds[ARRAY_SIZE(m_nearPeds) - 1] = nil;
 				nearPed->m_numNearPeds--;
 			} else
 				j++;
@@ -2473,12 +2474,12 @@ CPed::ProcessControl(void)
 							obstacleForFlyingOtherDirZ = 501.0f;
 						}
 #ifdef VC_PED_PORTS
-						uint8 flyDir = 0;
+						int16 flyDir = 0;
 						float feetZ = GetPosition().z - FEET_OFFSET;
 #ifdef FIX_BUGS
-						if (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
+						if (obstacleForFlyingZ > feetZ && obstacleForFlyingZ < 500.0f)
 							flyDir = 1;
-						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingZ < 500.0f)
+						else if (obstacleForFlyingOtherDirZ > feetZ && obstacleForFlyingOtherDirZ < 501.0f)
 							flyDir = 2;
 #else
 						if ((obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ < 500.0f) || (obstacleForFlyingZ > feetZ && obstacleForFlyingOtherDirZ > feetZ))
@@ -2487,8 +2488,8 @@ CPed::ProcessControl(void)
 							flyDir = 2;
 #endif
 
-						if (flyDir != 0 && !bSomeVCflag1) {
-							SetPosition((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
+						if (flyDir > 0 && !bSomeVCflag1) {
+							GetMatrix().SetTranslateOnly((flyDir == 2 ? obstacleForFlyingOtherDir.point : obstacleForFlying.point));
 							GetMatrix().GetPosition().z += FEET_OFFSET;
 							GetMatrix().UpdateRW();
 							SetLanding();
@@ -3187,7 +3188,7 @@ CPed::ProcessEntityCollision(CEntity *collidingEnt, CColPoint *collidingPoints)
 							lowerSpeedLimit *= 1.5f;
 						}
 						CAnimBlendAssociation *fallAnim = RpAnimBlendClumpGetAssociation(GetClump(), ANIM_STD_FALL);
-						if (!bWasStanding && speed > upperSpeedLimit && (/*!bPushedAlongByCar ||*/ m_vecMoveSpeed.z < lowerSpeedLimit)
+						if (!bWasStanding && ((speed > upperSpeedLimit /* ||!bPushedAlongByCar*/) || (m_vecMoveSpeed.z < lowerSpeedLimit))
 							&& m_pCollidingEntity != collidingEnt) {
 
 							float damage = 100.0f * Max(speed - 0.25f, 0.0f);
@@ -8496,21 +8497,21 @@ CPed::renderLimb(int node)
 void
 CPed::Save(uint8*& buf)
 {
-	SkipSaveBuf(buf, 52);
+	ZeroSaveBuf(buf, 52);
 	CopyToBuf(buf, GetPosition().x);
 	CopyToBuf(buf, GetPosition().y);
 	CopyToBuf(buf, GetPosition().z);
-	SkipSaveBuf(buf, 288);
+	ZeroSaveBuf(buf, 288);
 	CopyToBuf(buf, CharCreatedBy);
-	SkipSaveBuf(buf, 351);
+	ZeroSaveBuf(buf, 351);
 	CopyToBuf(buf, m_fHealth);
 	CopyToBuf(buf, m_fArmour);
-	SkipSaveBuf(buf, 148);
+	ZeroSaveBuf(buf, 148);
 	for (int i = 0; i < 13; i++) // has to be hardcoded
 		m_weapons[i].Save(buf);
-	SkipSaveBuf(buf, 5);
+	ZeroSaveBuf(buf, 5);
 	CopyToBuf(buf, m_maxWeaponTypeAllowed);
-	SkipSaveBuf(buf, 162);
+	ZeroSaveBuf(buf, 162);
 }
 
 void
